@@ -14,8 +14,8 @@ global {
 	date starting_date <- date("2020-04-10-00-00-00");
 	float step <- 1 #mn;
 	
-	file roads_shapefile <- file("../includes/circuitv2.shp");
-	file checkpoints_shapefile <- file("../includes/checkpointsv2.shp");
+	file roads_shapefile <- file("../includes/shapefiles/circuitv2.shp");
+	file checkpoints_shapefile <- file("../includes/shapefiles/checkpointsv2.shp");
 	geometry shape <- envelope(roads_shapefile);
 	graph road_graph;
 	
@@ -24,6 +24,7 @@ global {
 	float car_speed <- 2 #km / #h;
 	float min_car_speed <- 0.5 #km/#h;
 	float max_car_speed <- 5.0 #km/#m;
+	float seuil_vitesse_min <- 0.1;
 	
 	point vecteur_base <- {0,-1,0};
 	

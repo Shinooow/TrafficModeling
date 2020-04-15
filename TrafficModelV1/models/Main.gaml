@@ -25,6 +25,8 @@ global {
 	float min_car_speed <- 0.5 #km/#h;
 	float max_car_speed <- 5.0 #km/#m;
 	
+	point vecteur_base <- {0,-1,0};
+	
 	/* DEBUT: TEST LECTURE FICHIER CSV */
 	//csv_file fcsv <- csv_file("../includes/file.csv");
   	//matrix ma <- matrix(fcsv);

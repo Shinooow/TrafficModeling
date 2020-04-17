@@ -9,7 +9,7 @@ model Car
 import "Main.gaml"
 import "Road.gaml"
 
-species Car skills: [advanced_driving] {
+species Car skills: [advanced_driving, Bluetooth] {
 	/* Propriétés sur l'affichage des voitures sur la simulation */
 	rgb color <- #red;
 	file car_icon <- file("../includes/images/red-car.png");
@@ -22,6 +22,8 @@ species Car skills: [advanced_driving] {
 	float angle_rotation <- 0.0;
 	point last_location;
 	point vecteur_direction;
+	
+	int id;
 	
 	/* Si must_stay_on_road est placé à faux la voiture peut
 	 * se déplacer en dehors de la route
@@ -128,6 +130,7 @@ species Car skills: [advanced_driving] {
 		crashed <- true;
 		car_icon <- crashed_car_icon;
 		speed <- 0.0;
+		nb_crashed_cars <- nb_crashed_cars +1;
 	}
 	
 	/** VERIFICATION_COLLISION
@@ -211,6 +214,8 @@ species Car skills: [advanced_driving] {
 		do verification_collision;
 		/* Calcul de l'angle de la rotation de l'icone voiture */
 		do calcul_angle_rotation;
+		//Integer test <- connectionToCars(5);
+		
 	}
 
 	aspect base {

@@ -19,7 +19,7 @@ global {
 	geometry shape <- envelope(roads_shapefile);
 	graph road_graph;
 	
-	int nb_cars <- 20;
+	int nb_cars <- 1;
 	int cycle_time_checkpoint <- 2;
 	float car_speed <- 2 #km / #h;
 	float min_car_speed <- 0.5 #km/#h;
@@ -27,6 +27,8 @@ global {
 	float seuil_vitesse_min <- 0.1;
 	
 	point vecteur_base <- {0,-1,0};
+	
+	int nb_crashed_cars <- 0;
 	
 	/* DEBUT: TEST LECTURE FICHIER CSV */
 	//csv_file fcsv <- csv_file("../includes/file.csv");
@@ -36,11 +38,15 @@ global {
  	/* FIN: TEST LECTURE FICHIER CSV */
 	
 	init {
+		int id_created <- 0;
 		create Road from: roads_shapefile;
 		create Checkpoint from: checkpoints_shapefile;
 		road_graph <- as_edge_graph(Road.population);
 		create Car number: nb_cars {
 			self.location <- any_location_in(one_of(Road));
+			self.id <- id_created;
+			id_created <- id_created +1;
+			do connectCar(self.id);
 		}
 		
 	}

@@ -1,3 +1,5 @@
+# -*- encoding: UTF-8 -*-
+
 import os
 import sys
 import time
@@ -307,22 +309,12 @@ def connect_all_cars(nombre_voiture):
 #SUPPRESSION/DECONNEXION DES VOITURES
 def disconnect_all_cars(appareils_connectes):
     for i in range(len(appareils_connectes)):
-        disconnectDevice(i)
+        if appareils_connectes[i] != None:
+            disconnectDevice(i)
 
-#
-if len(sys.argv) == 2:
-    nombre_voiture = int(sys.argv[1])
-    appareils_connectes = [None] * nombre_voiture 
-    #TESTS
-    #connect_all_cars(nombre_voiture)
-    #move_backward(1)
-    #forward_to_right(1)
-    #forward_to_left(1)
-    #backward_to_right(1)
-    #backward_to_left(0)
-    #disconnect_all_cars(appareils_connectes)
-else: 
-    print("Usage: <nombre de voiture>") 
+
+#Nombre maximal de voiture placé à 30
+appareils_connectes = [None] * 30
 
 
 

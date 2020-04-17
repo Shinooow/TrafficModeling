@@ -1,3 +1,5 @@
+# -*- encoding: UTF-8 -*-
+
 #from bluetooth import *
 
 # Créé une socket Bluetooth

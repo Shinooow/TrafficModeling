@@ -21,7 +21,7 @@ global {
 	geometry shape <- envelope(roads_shapefile);
 	graph road_graph;
 	
-	int nb_cars <- 1;
+	int nb_cars <- 3;
 	int cycle_time_checkpoint <- 2;
 	float car_speed <- 2 #km / #h;
 	float min_car_speed <- 0.5 #km/#h;
@@ -72,7 +72,9 @@ global {
 	reflex stop_simulation when: nb_step = data_size-1{
 		loop car over: Car.population{
 			ask car{
-				do disconnectCar(car.id);
+				if(not is_connected){
+					do disconnectCar(car.id);
+				}
 			}
 		}
 		do pause;

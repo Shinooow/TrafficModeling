@@ -13,6 +13,10 @@ species Checkpoint {
 	rgb color <- #green;
 	int next_date_change_location <- world.current_date.hour + cycle_time_checkpoint;
 	
+	/** REFLEX MOVE_EVERY_2HR
+	 * Condition: lorsque deux heures sont passees dans l environnement, 1 cycle = 1 minute
+	 * Change la position des checkpoints sur la carte aléatoirement sur une route
+	 */
 	reflex move_every_2hr when: world.current_date.hour = next_date_change_location {
 		location <- any_location_in(one_of(Road));
 		next_date_change_location <- (world.current_date.hour +2) mod 24;

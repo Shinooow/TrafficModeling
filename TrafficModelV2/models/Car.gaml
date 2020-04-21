@@ -30,7 +30,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 	/* Si must_stay_on_road est placé à faux la voiture peut
 	 * se déplacer en dehors de la route
 	 */
-	bool must_stay_on_road <- true;
+	bool must_stay_on_road <- false;
 	
 	/* Propriétés sur les variations de vitesse de la voiture
 	 * coefficients et booleens sur les conditions d'acceleration
@@ -133,6 +133,10 @@ species Car skills: [advanced_driving, Bluetooth] {
 		car_icon <- crashed_car_icon;
 		speed <- 0.0;
 		nb_crashed_cars <- nb_crashed_cars +1;
+		if(is_connected){
+			do disconnectCar(id);
+			is_connected <- false;
+		}
 	}
 	
 	/** VERIFICATION_COLLISION
@@ -152,8 +156,12 @@ species Car skills: [advanced_driving, Bluetooth] {
 		loop other_car over: Car.population {
 			if (self != other_car) {
 			/* Si présents sur la même route */
-				if (self.coeff_directeur = other_car.coeff_directeur and self.val_origine = other_car.val_origine) {
-				/* on regarde si other_car est passé sur la portion de route où self est passé*/
+			/* Ajout 21/04: reduction de la precision sur l'egalite des valeurs a l origine des equations de droite en raison de 
+			 * de la surface de la voiture (il n'y a pas collision que si les deux voitures sont passees exactement par la meme 
+			 * droite
+			 */
+				if (self.coeff_directeur = other_car.coeff_directeur and self.val_origine >= (other_car.val_origine-40.0) and self.val_origine <= (other_car.val_origine+40.0)) {
+					/* on regarde si other_car est passé sur la portion de route où self est passé*/
 					float tmin <- min(self.last_location.x, self.location.x);
 					float tmax <- max(self.last_location.x, self.location.x);
 					if ((other_car.location.x >= tmin and other_car.location.x <= tmax) or (other_car.last_location.x >= tmin and other_car.last_location.x <= tmax)) {
@@ -163,6 +171,18 @@ species Car skills: [advanced_driving, Bluetooth] {
 						}
 						do rentre_en_collision;
 					}
+				} else {
+					/* Ajout 21/04: si il y a une collision dans un virage (ce qui rend le calcul via les equations de droite faux */
+					list<Car> neighbors <- self neighbors_at(20.0);
+					if(length(neighbors) > 0){
+						write "car crash";
+						loop other_car over: neighbors{
+							ask other_car {
+								do rentre_en_collision;
+							}
+						}
+						do rentre_en_collision;
+					}				
 				}
 			}
 		}

@@ -13,13 +13,12 @@ from BluetoothClass import *
 # Une socket Bluetooth
 def connectNewDevice(macaddr, selectedCar) :
     new_socket = Bluetooth()
-    print("selectedCar = ", selectedCar)
     if appareils_connectes[selectedCar] == None :
         #print("appareils_connectes[selectedCar] = ", appareils_connectes[selectedCar])
         new_socket.connect(macaddr)
         appareils_connectes[selectedCar] = new_socket  # enregistre la socket dans notre liste d'appareils connectés
     else :
-        print("Vous êtes déjà connecté à cet appareil !")
+        print("Vous etes deja connecte a cet appareil !")
 
 # Déconnexion d'une socket
 def disconnectDevice(selectedCar):
@@ -229,7 +228,7 @@ def m4(selectedCar):
     forward_to_left(selectedCar)
     time.sleep(0.5)
     forward_to_left(selectedCar)
-
+   
 # Macro 5 - Rangement en creneau
 def m5(selectedCar):
     move_forward(selectedCar)
@@ -264,37 +263,6 @@ def m8(selectedCar):
     forward_to_left(selectedCar)
     time.sleep(0.7)
     forward_to_right(selectedCar)
-
-###########################################################################
-# Fonction d'enregistrement
-
-def write_rec():
-    global macro_rec
-    print("oui")
-    if (varRec.get()):
-        print("BEGIN : REC")
-    else:
-        print("END : REC")
-        print(macro_rec)
-        macro_rec = []
-
-def read_rec(event,macro):
-    for c in macro:
-        if (c==1):  
-            move_forward(event)
-        elif (c==2):
-            move_backward(event)
-        elif (c==3):
-            forward_to_left(event)
-        elif (c==4):
-            forward_to_right(event)
-        elif (c==5):
-            backward_to_left(event)
-        elif (c==6):  
-            backward_to_right(event)
-        time.sleep(1)        
-
-
 
 
 ####### INFORMATIONS

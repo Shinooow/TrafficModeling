@@ -14,6 +14,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 	rgb color <- #red;
 	file car_icon <- file("../includes/images/red-car.png");
 	file crashed_car_icon <- file("../includes/images/black-car.png");
+	file fleche_icon <- file("../includes/images/test4.jpg");
 	
 	float speed <- rnd(min_car_speed, max_car_speed);
 	float max_speed <- speed;
@@ -30,7 +31,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 	/* Si must_stay_on_road est placé à faux la voiture peut
 	 * se déplacer en dehors de la route
 	 */
-	bool must_stay_on_road <- false;
+	bool must_stay_on_road <- true;
 	
 	/* Propriétés sur les variations de vitesse de la voiture
 	 * coefficients et booleens sur les conditions d'acceleration
@@ -45,6 +46,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 	/* Equations de la droite de la route sous forme: coeff_directeur * x + val_origine */
 	float coeff_directeur;
 	float val_origine;
+	bool vertical_eq <- false;
 	bool crashed <- false;
 
 	/** CALCUL_EQ_ROUTE  
@@ -59,12 +61,14 @@ species Car skills: [advanced_driving, Bluetooth] {
 		
 		float n <- location.x - last_location.x;
 		if (n != 0) {
+			vertical_eq <- false;
 			coeff_directeur <- (location.y - last_location.y) / n;
 			val_origine <- last_location.y - coeff_directeur * last_location.x;
 			coeff_directeur <- coeff_directeur with_precision 3;
 			val_origine <- val_origine with_precision 3;
+		} else if(n=0 and last_location.y!=location.y){
+			vertical_eq <- true;
 		}
-
 	}
 
 	/** FREINAGE
@@ -160,7 +164,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 			 * de la surface de la voiture (il n'y a pas collision que si les deux voitures sont passees exactement par la meme 
 			 * droite
 			 */
-				if (self.coeff_directeur = other_car.coeff_directeur and self.val_origine >= (other_car.val_origine-40.0) and self.val_origine <= (other_car.val_origine+40.0)) {
+				if ((self.coeff_directeur = other_car.coeff_directeur and self.val_origine >= (other_car.val_origine-40.0) and self.val_origine <= (other_car.val_origine+40.0)) or vertical_eq) {
 					/* on regarde si other_car est passé sur la portion de route où self est passé*/
 					float tmin <- min(self.last_location.x, self.location.x);
 					float tmax <- max(self.last_location.x, self.location.x);
@@ -227,18 +231,20 @@ species Car skills: [advanced_driving, Bluetooth] {
 			do acceleration;
 		}
 		/* Deplacements sur la route (ou non) */
-//		if (must_stay_on_road) {
-//			do goto target: target on: world.road_graph;
-//		} else {
-//			do goto target: target;
-//		}
+		if (must_stay_on_road) {
+			do goto target: target on: world.road_graph;
+		} else {
+			do goto target: target;
+		}
 
 		/* Modfication de la position selon les donnees de la camera */
-		list<float> ligne_a_lire <- rows_list[nb_step-1];
-		point new_location <- {ligne_a_lire[2*id]*mise_a_echelle, ligne_a_lire[2*id+1]*mise_a_echelle, 0};
-		location <- new_location;
-
-		
+//		list<float> ligne_a_lire <- rows_list[nb_step-1];
+//		write ligne_a_lire;
+//		if(nb_step < data_size_init){
+//			point new_location <- {ligne_a_lire[2*id]*mise_a_echelle, ligne_a_lire[2*id+1]*mise_a_echelle, 0};
+//			location <- new_location;
+//		}
+//		
 		/* Vérification de collision */
 		do verification_collision;
 		/* Calcul de l'angle de la rotation de l'icone voiture */
@@ -263,6 +269,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 
 	aspect with_icon {
 		draw car_icon size: 50 rotate: angle_rotation;
+		draw fleche_icon at: {location.x-25, location.y-25, 0} rotate: angle_rotation size: 30;
 		draw string(speed with_precision 3) size: 20 color: #black width: 5;
 	}
 

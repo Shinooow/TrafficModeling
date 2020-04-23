@@ -21,7 +21,12 @@ global {
 	geometry shape <- envelope(roads_shapefile);
 	graph road_graph;
 	
-	int nb_cars <- 3;
+	/* TESTS CSV LECTURE/ECRITURE 1 SEULE LIGNE */
+	csv_file csv_test <- csv_file("../includes/file.csv");
+	matrix csv_matrice <- matrix(csv_test);
+	list<int> list_ligne <- list<int>(row_at(csv_matrice, 0)); 
+	
+	int nb_cars <- 20;
 	int cycle_time_checkpoint <- 2;
 	float car_speed <- 2 #km / #h;
 	float min_car_speed <- 0.5 #km/#h;
@@ -41,7 +46,7 @@ global {
  	csv_file camera_data <- csv_file("../includes/data_camera.csv");
  	matrix camera_data_matrice <- matrix(camera_data);
  	list<list<float>> rows_list <- list<list<float>>(rows_list(camera_data_matrice));
- 	int data_size <- length(rows_list);
+ 	int data_size_init <- length(rows_list);
 	
 	init {
 		int id_created <- 0;
@@ -63,13 +68,27 @@ global {
 	 */
 	reflex one_step {
 		nb_step <- nb_step +1;
+		/* Si on depasse les donnees presentes (TESTS SEULEMENT) alors 
+		 * on charge la nouvelle ligne disponible
+		 */
+//		write list_ligne;
+//		csv_test <- csv_file("../includes/file.csv");
+//		csv_matrice <- matrix(csv_test);
+//		list_ligne <- list<int>(row_at(csv_matrice, 0)); 
+//		if(nb_step >= data_size_init){
+//			write "nouveau chargement";
+//			camera_data <- csv_file("../includes/data_camera.csv");
+//			camera_data_matrice <- matrix(camera_data);
+//			add list<float>(row_at(camera_data_matrice, nb_step)) to: rows_list;
+//		}
 	}
 	
 	/** REFLEX STOP_SIMULATION
 	 * Condition: quand plus de donnees sont presentes sur la position des voitures depuis la camera
 	 * Deconnecte toute les voitures connectees en Bluetooth puis met en pause l'experimentation
 	 */
-	reflex stop_simulation when: nb_step = data_size-1{
+	reflex stop_simulation when: nb_step = data_size_init-1{
+		
 		loop car over: Car.population{
 			ask car{
 				if(not is_connected){

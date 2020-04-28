@@ -26,7 +26,7 @@ global {
 	matrix csv_matrice <- matrix(csv_test);
 	list<int> list_ligne <- list<int>(row_at(csv_matrice, 0)); 
 	
-	int nb_cars <- 20;
+	int nb_cars <- 1;
 	int cycle_time_checkpoint <- 2;
 	float car_speed <- 2 #km / #h;
 	float min_car_speed <- 0.5 #km/#h;
@@ -72,9 +72,10 @@ global {
 		 * on charge la nouvelle ligne disponible
 		 */
 //		write list_ligne;
-//		csv_test <- csv_file("../includes/file.csv");
-//		csv_matrice <- matrix(csv_test);
-//		list_ligne <- list<int>(row_at(csv_matrice, 0)); 
+		csv_test <- csv_file("../includes/file.csv");
+		csv_matrice <- matrix(csv_test);
+		list_ligne <- list<int>(row_at(csv_matrice, 0)); 
+		write list_ligne;
 //		if(nb_step >= data_size_init){
 //			write "nouveau chargement";
 //			camera_data <- csv_file("../includes/data_camera.csv");
@@ -87,7 +88,7 @@ global {
 	 * Condition: quand plus de donnees sont presentes sur la position des voitures depuis la camera
 	 * Deconnecte toute les voitures connectees en Bluetooth puis met en pause l'experimentation
 	 */
-	reflex stop_simulation when: nb_step = data_size_init-1{
+	reflex stop_simulation when: nb_step = 1000	{
 		
 		loop car over: Car.population{
 			ask car{

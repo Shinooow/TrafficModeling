@@ -10,7 +10,10 @@ model TestBluetooth
 import "Car.gaml"
 
 global {
-	/** Insert the global definitions, variables and actions here */
+	
+	/* Action de detruire l'agent utilise pour que chaque test 
+	 * soit independant l'un de l'autre
+	 */
 	action destruction_agents_tests {
 		Car car <- Car.population[0];
 		ask car {
@@ -19,12 +22,21 @@ global {
 	}
 	
 	setup {
+		/* Creation de l'agent voiture avant chaque test */
 		create Car {
 			self.id <- 0;
 			self.is_connected <- false;
 		}
 	}
 	
+	/* Objectif: verifier qu'une connexion et deconnexion bluetooth 
+	 * se deroule sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir subit une connexion
+	 * et une deconnexion
+	 * Resultat attendu: code de retour de la connexion et deconnexion
+	 * definis a 0
+	 */
 	test "CoDecoTest" {
 		Car car <- Car.population[0];
 		int connect <- -1;
@@ -33,10 +45,17 @@ global {
 			connect <- connectCar(0);
 			disconnect <- disconnectCar(0);
 		}
-		assert (connect = 0 and disconnect = 0 and (not car.is_connected));
+		assert (connect = 0 and disconnect = 0);
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action MoveForward se deroule sans 
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre d'avancer 
+	 * tout droit (ainsi que sa deconnexion pour passer a un autre test)
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "MoveForwardTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -49,6 +68,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif verifier que l'action MoveBackward se deroule sans 
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de
+	 * reculer (ainsi que sa deconnexion pour passer a un autre test)
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "MoveBackwardTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -61,6 +87,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action ForwardToLeft se deroule sans
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre d'avancer
+	 * vers la gauche (ainsi que sa deconnexion pour passer a un autre test)
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "ForwardToLeft" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -73,6 +106,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action ForwardToRight se deroule sans
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre d'avancer
+	 * vers la droite (ainsi que sa deconnexion pour passer a un autre test)
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "forwardToRight" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -85,6 +125,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action BackwardToLeft se deroule sans 
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de reculer
+	 * vers la gauche
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "backwardToLeft" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -97,6 +144,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action BackwardToRight se deroule sans 
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de reculer
+	 * vers la droite
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "backwardToRight" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -109,6 +163,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action ResetWheels se deroule sans
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de recadrer 
+	 * ses roues 
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "resetWheelsTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -121,6 +182,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action StopBeforeForward se deroule
+	 * sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de s'arreter
+	 * avant un futur ordre d'avancer
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "stopBeforeForwardTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -133,6 +201,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action StopBeforeBackward se deroule
+	 * sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de s'arreter
+	 * avant un futur ordre de reculer
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "stopBeforeBackward" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -145,6 +220,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action LeftHalfTurn se deroule
+	 * sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de faire
+	 * un demi tour gauche
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "LeftHalfTurnTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -157,6 +239,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action RightHalfTurn se deroule 
+	 * sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de faire 
+	 * un demi tour droit 
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "RightHalfTurnTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -169,7 +258,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
-	
+	/* Objectif: verifier que l'action ClockwiseCircle se deroule 
+	 * sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de faire
+	 * un cercle dans le sens des aiguilles d'une montre 
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "ClockwiseCircleTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -182,6 +277,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action AntiClockwiseCircle se deroule
+	 * sans probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de faire 
+	 * un cercle dans le sens inverse des aiguilles d'une montre
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "AntiClockwiseCircleTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -194,6 +296,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: verifier que l'action Slalom se deroule sans
+	 * probleme
+	 * Etat initial: un agent voiture sans particularite speciale
+	 * Etat final: un agent voiture apres avoir recu l'ordre de 
+	 * faire un slalom
+	 * Resultat attendu: code de retour de l'action = 0
+	 */
 	test "SlalomTest" {
 		Car car <- Car.population[0];
 		int resultat_retourne <- -1;
@@ -209,6 +318,5 @@ global {
 }
 
 experiment TestBluetooth type: test autorun: true {
-	/** Alternatively or in addition, you can insert here tests definitions */
 
 }

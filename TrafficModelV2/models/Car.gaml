@@ -169,7 +169,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 					float tmin <- min(self.last_location.x, self.location.x);
 					float tmax <- max(self.last_location.x, self.location.x);
 					if ((other_car.location.x >= tmin and other_car.location.x <= tmax) or (other_car.last_location.x >= tmin and other_car.last_location.x <= tmax)) {
-						write "car crash";
+						//write "car crash";
 						ask other_car {
 							do rentre_en_collision;
 						}
@@ -179,7 +179,7 @@ species Car skills: [advanced_driving, Bluetooth] {
 					/* Ajout 21/04: si il y a une collision dans un virage (ce qui rend le calcul via les equations de droite faux */
 					list<Car> neighbors <- self neighbors_at(20.0);
 					if(length(neighbors) > 0){
-						write "car crash";
+						//write "car crash";
 						loop other_car over: neighbors{
 							ask other_car {
 								do rentre_en_collision;
@@ -231,20 +231,17 @@ species Car skills: [advanced_driving, Bluetooth] {
 			do acceleration;
 		}
 		/* Deplacements sur la route (ou non) */
-		if (must_stay_on_road) {
-			do goto target: target on: world.road_graph;
-		} else {
-			do goto target: target;
-		}
+//		if (must_stay_on_road) {
+//			do goto target: target on: world.road_graph;
+//		} else {
+//			do goto target: target;
+//		}
 
 		/* Modfication de la position selon les donnees de la camera */
-//		list<float> ligne_a_lire <- rows_list[nb_step-1];
-//		write ligne_a_lire;
-//		if(nb_step < data_size_init){
-//			point new_location <- {ligne_a_lire[2*id]*mise_a_echelle, ligne_a_lire[2*id+1]*mise_a_echelle, 0};
-//			location <- new_location;
-//		}
-//		
+
+//		point new_location <- {list_ligne[3*id]*mise_a_echelle, list_ligne[3*id+1]*mise_a_echelle, 0};
+//		location <- new_location;
+//		angle_rotation <- float(list_ligne[3*id+2]);
 		/* Vérification de collision */
 		do verification_collision;
 		/* Calcul de l'angle de la rotation de l'icone voiture */

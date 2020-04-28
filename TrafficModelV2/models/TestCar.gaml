@@ -11,6 +11,9 @@ import "Car.gaml"
 
 global {
 	
+	/* Destruction des agents apres un test pour re-faire une initialisation
+	 * chaque test doit demarrer dans les memes conditions
+	 */
 	action destruction_agents_tests {
 		Car c1 <- Car.population[0];
 		Car c2 <- Car.population[1];
@@ -37,7 +40,13 @@ global {
 		}
 	}
 	
-	
+	/* Objectif: montrer la collision lorsque deux voitures se rencontrent
+	 * sur une ligne droite
+	 * Etat initial: deux agents voitures ayant deux directions qui se croisent
+	 * en ligne droite
+	 * Etat final: Agents voiture en collision (ou non en fonction du resultat du test)
+	 * Resultat attendu: les deux agents en collision
+	 */
 	test "LigneDroiteCollisionTest" {
 		Car c1 <- Car.population[0];
 		Car c2 <- Car.population[1];
@@ -57,6 +66,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: montrer la collision lorsque deux voitures se rencontrent
+	 * sur un seul et même point
+	 * Etat initial: deux agents voiture ayant comme point de position les meme
+	 * Etat final: Agents voiture en collision (ou non en fonction du resultat 
+	 * du test)
+	 * Resultat attendu: les deux agents en collision
+	 */
 	test "PointCollisionTest" {
 		Car c1 <- Car.population[0];
 		Car c2 <- Car.population[1];
@@ -76,6 +92,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: montrer la collision lorsque deux voitures se rencontrent
+	 * pendant un virage
+	 * Etat initial: deux agents voitures ayant des directions se rencontrant
+	 * Etat final: Agents voiture en collision (ou non en fonction du resultat 
+	 * du test)
+	 * Resultat attendu: les deux agents en collision
+	 */
 	test "VirageCollisionTest" {
 		Car c1 <- Car.population[0];
 		Car c2 <- Car.population[1];
@@ -94,6 +117,13 @@ global {
 		do destruction_agents_tests;
 	}
 	
+	/* Objectif: montrer que si les directions ne se croisent pas il
+	 * n'y a pas de collision
+	 * Etat initial: deux agent voiture ayant des directions ne se rencontrant pas
+	 * Etat final: Agents voiture pas en collision (ou en collision en fonction du 
+	 * resultat du test)
+	 * Resultat attendu: les deux agents ne sont pas en collision
+	 */
 	test "SansCollisionTest" {
 		Car c1 <- Car.population[0];
 		Car c2 <- Car.population[1];
@@ -116,6 +146,5 @@ global {
 }
 
 experiment TestCar type: test autorun: true {
-	/** Alternatively or in addition, you can insert here tests definitions */
 
 }

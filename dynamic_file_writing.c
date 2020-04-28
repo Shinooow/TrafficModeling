@@ -11,16 +11,16 @@
 #define SUCCESS 0
 #define FAIL 1
 #define MAX_FILE_PATH_SIZE 100
-#define MAX_STEPS 10
 
-int delay;
+float delay;
 char file_path[MAX_FILE_PATH_SIZE];
 int nb_cars;
 int step;
+int max_steps;
 
 void verification_parametres(int argc, char ** argv){
-	if(argc != 4){
-		fprintf(stderr, "Usage: %s <file_path> <delay> <nb_cars>\n", argv[0]);
+	if(argc != 5){
+		fprintf(stderr, "Usage: %s <file_path> <delay between 0.0 and 1.0 second> <nb_cars> <max_steps>\n", argv[0]);
 		exit(FAIL);
 	}
 }
@@ -30,13 +30,14 @@ void traiterSIGALRM(int signal){
 	for(int i = 0; i < nb_cars; i++){
 		int nombre_aleatoire_x = rand()%(200-100)+100;
 		int nombre_aleatoire_y = rand()%(200-100)+100;
-		printf("Voiture %d - Ecriture de: %d et %d\n", i, nombre_aleatoire_x, nombre_aleatoire_y);
-		fprintf(file, " %d , %d ,", nombre_aleatoire_x, nombre_aleatoire_y);
+		int nombre_aleatoire_rotation = rand()%(360);
+		printf("Voiture %d - Ecriture: x %d y %d rotation %d\n", i, nombre_aleatoire_x, nombre_aleatoire_y, nombre_aleatoire_rotation);
+		fprintf(file, " %d , %d , %d", nombre_aleatoire_x, nombre_aleatoire_y, nombre_aleatoire_rotation);
 	}
 	fprintf(file, "\n");
 	fclose(file);
 	/* redefinition de l'alarme */
-	alarm(delay);
+	ualarm(delay*1000000.0, 0);
 	step++;
 }
 
@@ -45,9 +46,10 @@ int main(int argc, char ** argv){
 	/* Verification de la validite de l'utilisation du script */
 	verification_parametres(argc, argv);
 	strcpy(file_path, argv[1]);
-	delay = atoi(argv[2]);
+	delay = atof(argv[2]);
 	step = 0;
 	nb_cars = atoi(argv[3]);
+	max_steps = atoi(argv[4]);
 
 	/* definition du comportement quand l'alarme sonne */
 	struct sigaction action;
@@ -63,8 +65,8 @@ int main(int argc, char ** argv){
 	}
 
 	/* Placement de l'alarme et traitement */
-	alarm(delay);
-	while(step < MAX_STEPS);
+	ualarm(delay*1000000.0, 0);
+	while(step < max_steps);
 
 	return SUCCESS;
 }

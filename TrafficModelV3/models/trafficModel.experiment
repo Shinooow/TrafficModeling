@@ -1,0 +1,35 @@
+/***
+* Name: trafficModel
+* Author: Maxence
+* Description: This wizard creates a new experiment file.
+* Tags: Tag1, Tag2, TagN
+***/
+
+experiment trafficModel model:'Main.gaml' type:gui {
+	
+	parameter "Number of cars" var: nb_cars min: 1 max:50 category: "Cars";
+	parameter "Min car speed" var: min_car_speed min: 0.1 #km/#h max: 2.0 #km/#h category: "Cars";
+	parameter "Max car speed" var: max_car_speed min: 3.0 #km/#h max: 5.0 #km/#h category: "Cars";
+	parameter "Cycle time to change checkpoint location (hours)" var: cycle_time_checkpoint min: 1 max: 5 category: "Checkpoints";
+	
+	output {
+		/* Display MAP: affichage des especes */
+		display "map" type: opengl{
+			species Road aspect: base;		
+			species Checkpoint aspect: base;	
+			species BluetoothCar aspect: with_icon;
+		}
+		
+		/* Display crash_information: graphique type series 
+		 * affiche l'evolution du nombre d'accident de voiture
+		 */
+		display crash_information refresh: every (1#cycle){
+			chart "Evolution of number of crashed cars"  size: {0.5,0.5} type: series{
+				data "number_of_crashed_cars" value: nb_crashed_cars color: #blue;
+			}
+		}
+		
+		/* Moniteur sur la date du monde dans l'experimentation (pour illustrer les changements de position des checkpoints) */
+		monitor "Current date" value: world.current_date;
+	}
+}

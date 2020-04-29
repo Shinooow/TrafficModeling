@@ -12,4 +12,22 @@ import "Vehicle.gaml"
 /* Insert your model definition here */
 species NonGuidableVehicle parent: Vehicle {
 	
+	/** OVERRIDE FROM VEHICLE */
+	reflex mise_a_jour when: target != nil and not crashed {
+		last_location <- location;
+		if(must_brake){
+			do freinage;
+		} else if(can_speed_up){
+			do acceleration;
+		}
+		
+		if(must_stay_on_road){
+			do goto target: target on: world.road_graph speed: speed;
+		} else {
+			do goto target: target speed: speed;
+		}
+		
+		do calcul_angle_rotation;
+		do verification_collision;
+	}
 }

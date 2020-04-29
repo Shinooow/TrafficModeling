@@ -18,6 +18,8 @@ experiment trafficModel model:'Main.gaml' type:gui {
 			species Road aspect: base;		
 			species Checkpoint aspect: base;	
 			species BluetoothCar aspect: with_icon;
+			species Bike aspect: with_icon;
+			species Home aspect: base;
 		}
 		
 		/* Display crash_information: graphique type series 

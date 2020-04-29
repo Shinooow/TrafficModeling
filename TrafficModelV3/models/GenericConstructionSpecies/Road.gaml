@@ -8,12 +8,14 @@
 model Road
 
 import "Construction.gaml"
-/* Insert your model definition here */
+import "../OtherSpecies/Rule.gaml"
 
 species Road parent: Construction {
 	rgb color <- #black;
 	int nombreVoies;
 	float vitesseMax;
+	list<Rule> rules;
+	
 	
 	aspect base {
 		draw shape color: color width: 4;

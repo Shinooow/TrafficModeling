@@ -9,6 +9,7 @@ species Vehicle skills: [moving] {
 	file car_icon <- file("../../includes/images/red-car.png");
 	file crashed_car_icon <- file("../../includes/images/black-car.png");
 	file fleche_icon <- file("../../includes/images/test4.jpg");
+	float icon_size <- 50.0;
 	
 	float speed <- rnd(min_car_speed, max_car_speed);
 	float max_speed <- speed;
@@ -214,51 +215,19 @@ species Vehicle skills: [moving] {
 	 * - Calculs de collisions
 	 * - Calculs d'angle de rotation de l'image
 	 */
-	reflex move when: target != nil and (not crashed){
-		
-		last_location <- location;
-		/* Variations de vitesse */
-		if (must_brake) {
-			do freinage;
-		} else if (can_speed_up) {
-			do acceleration;
-		}
-		/* Deplacements sur la route (ou non) */
-//		if (must_stay_on_road) {
-//			do goto target: target on: world.road_graph;
-//		} else {
-//			do goto target: target;
-//		}
-
-		/* Modfication de la position selon les donnees de la camera */
-
-//		point new_location <- {list_ligne[3*id]*mise_a_echelle, list_ligne[3*id+1]*mise_a_echelle, 0};
-//		location <- new_location;
-//		angle_rotation <- float(list_ligne[3*id+2]);
-		/* Vérification de collision */
-		do verification_collision;
-		/* Calcul de l'angle de la rotation de l'icone voiture */
-		do calcul_angle_rotation;
-		
-//		if(is_connected){
-//			do moveForward(id);
-//			do moveBackward(id);
-//			do forwardToLeft(id);
-//			do forwardToRight(id);
-//			do backwardToLeft(id);
-//			do backwardToRight(id);
-//			do resetWheels(id);
-//			do stopBeforeBackward(id);
-//			do stopBeforeForward(id);
-//		}
+	reflex mise_a_jour when: target != nil and (not crashed){
+		// REDEFINI PAR LES ESPECES FILLES
 	}
-
-	aspect base {
-		draw circle(10.0 #m) color: color border: #black;
+	
+	reflex get_rules when: not crashed {
+		list<Road> on_road <- Road.population at_distance (0.5);
+		loop ag over: on_road {
+			write ag.rules[0].contenu;
+		}
 	}
 
 	aspect with_icon {
-		draw car_icon size: 50 rotate: angle_rotation;
+		draw car_icon size: icon_size rotate: angle_rotation;
 		draw fleche_icon at: {location.x-25, location.y-25, 0} rotate: angle_rotation size: 30;
 		draw string(speed with_precision 3) size: 20 color: #black width: 5;
 	}

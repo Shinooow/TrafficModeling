@@ -11,5 +11,6 @@ import "../GenericConstructionSpecies/Building.gaml"
 
 /* Insert your model definition here */
 species Home parent: Building {
-	
+	rgb color <- #blue;
+	int nbMaxAgentsLinked <- 5;
 }

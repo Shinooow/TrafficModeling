@@ -11,5 +11,8 @@ import "../GenericVehicleSpecies/NonGuidableVehicle.gaml"
 
 /* Insert your model definition here */
 species Bike parent: NonGuidableVehicle {
+	file car_icon <- file("../../includes/images/bicycle.png");
+	float icon_size <- 50.0;
 	
+	/** OVERRIDE FROM VEHICLE */
 }

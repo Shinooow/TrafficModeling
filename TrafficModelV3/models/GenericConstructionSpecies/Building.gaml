@@ -1,6 +1,6 @@
 /***
 * Name: Building
-* Author: shino
+* Author: Maxence
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
@@ -13,4 +13,8 @@ import "../GenericConstructionSpecies/Construction.gaml"
 species Building parent: Construction {
 	rgb color;
 	int nbMaxAgentsLinked;
+	
+	aspect base {
+		draw rectangle(dimension_longueur, dimension_largeur) color: color;
+	}
 }

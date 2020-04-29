@@ -9,12 +9,14 @@ model Main
 import "./GenericConstructionSpecies/Road.gaml"
 import "./GenericVehicleSpecies/Vehicle.gaml"
 import "./VehicleSpecies/BluetoothCar.gaml"
-import "Checkpoint.gaml"
+import "./OtherSpecies/Checkpoint.gaml"
+import "./VehicleSpecies/Bike.gaml"
+import "./ConstructionSpecies/Home.gaml"
 
 global {
 	/* World paramaters */
 	date starting_date <- date("2020-04-10-00-00-00");
-	float step <- 1 #mn;
+	float step <- 5 #mn;
 	
 	/* Graphic parameters - shapesfiles */
 	file roads_shapefile <- file("../includes/shapefiles/circuitv2.shp");
@@ -22,7 +24,7 @@ global {
 	geometry shape <- envelope(roads_shapefile);
 	graph road_graph;
 	
-	/* TESTS CSV LECTURE/ECRITURE 1 SEULE LIGNE */
+	/* LECTURE DES INFORMATIONS DE LA CAMERA */
 	csv_file csv_test <- csv_file("../includes/file.csv");
 	matrix csv_matrice <- matrix(csv_test);
 	list<int> list_ligne <- list<int>(row_at(csv_matrice, 0)); 
@@ -43,23 +45,49 @@ global {
 	int nb_step <- 0;
 	float mise_a_echelle <- 7.0;
 	
-	/* Lecture des donnees de la camera depuis un fichier csv */
- 	csv_file camera_data <- csv_file("../includes/data_camera.csv");
- 	matrix camera_data_matrice <- matrix(camera_data);
- 	list<list<float>> rows_list <- list<list<float>>(rows_list(camera_data_matrice));
- 	int data_size_init <- length(rows_list);
+	list<Vehicle> vehicules;
+	list<Construction> constructions;
 	
 	init {
-		int id_created <- 0;
+		int id_vehicle_created <- 0;
+		int id_construction_created <- 0;
 		create Road from: roads_shapefile;
 		create Checkpoint from: checkpoints_shapefile;
 		road_graph <- as_edge_graph(Road.population);
+		
+		create Rule {
+			 self.contenu <- "Je suis la regle 1";
+		}
+		
+		loop road over: Road.population {
+			ask road {
+				add Rule.population[0] to: rules;
+			}
+		}
+		
 		create BluetoothCar number: nb_cars {
 			self.location <- any_location_in(one_of(Road));
-			self.id <- id_created;
+			self.id <- id_vehicle_created;
 			do connectCar(self.id);
 			self.is_connected <- true;
-			id_created <- id_created +1;
+			id_vehicle_created <- id_vehicle_created +1;
+			add self to: vehicules;
+		}
+		
+		create Bike number: nb_cars {
+			self.location <- any_location_in(one_of(Road));
+			self.id <- id_vehicle_created;
+			id_vehicle_created <- id_vehicle_created +1;
+			add self to: vehicules;
+		}
+		
+		create Home {
+			self.location <- {200.0 , 200.0, 0.0};
+			self.dimension_longueur <- 50.0;
+			self.dimension_largeur <- 50.0;
+			self.id <- id_construction_created;
+			id_construction_created <- id_construction_created +1;
+			add self to: constructions;
 		}
 	}
 	
@@ -68,33 +96,30 @@ global {
 	 * nous nous trouvons
 	 */
 	reflex one_step {
+		
 		nb_step <- nb_step +1;
 		/* Si on depasse les donnees presentes (TESTS SEULEMENT) alors 
 		 * on charge la nouvelle ligne disponible
 		 */
-//		write list_ligne;
 		csv_test <- csv_file("../includes/file.csv");
 		csv_matrice <- matrix(csv_test);
 		list_ligne <- list<int>(row_at(csv_matrice, 0)); 
 		write list_ligne;
-//		if(nb_step >= data_size_init){
-//			write "nouveau chargement";
-//			camera_data <- csv_file("../includes/data_camera.csv");
-//			camera_data_matrice <- matrix(camera_data);
-//			add list<float>(row_at(camera_data_matrice, nb_step)) to: rows_list;
-//		}
 	}
 	
 	/** REFLEX STOP_SIMULATION
 	 * Condition: quand plus de donnees sont presentes sur la position des voitures depuis la camera
 	 * Deconnecte toute les voitures connectees en Bluetooth puis met en pause l'experimentation
 	 */
-	reflex stop_simulation when: nb_step = 1000	{
+	reflex stop_simulation when: nb_step = 100 {
 		
-		loop car over: BluetoothCar.population{
-			ask car{
-				if(not is_connected){
-					do disconnectCar(car.id);
+		loop car over: vehicules{
+			if(car is GuidableVehicle){
+				GuidableVehicle guidableCar <- GuidableVehicle(car);
+				ask guidableCar{
+					if(is_connected){
+						do disconnectCar(car.id);
+					}
 				}
 			}
 		}

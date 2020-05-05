@@ -28,4 +28,17 @@ species GuidableVehicle parent: Vehicle skills: [Bluetooth]{
 		
 		do verification_collision;
 	}
+	
+	/** OVERRIDE FROM VEHICLE */
+	action rentre_en_collision{
+		
+		crashed <- true;
+		car_icon <- crashed_car_icon;
+		speed <- 0.0;
+		nb_crashed_cars <- nb_crashed_cars +1;
+		if(is_connected){
+			do disconnectCar(id);
+			is_connected <- false;
+		}
+	}
 }

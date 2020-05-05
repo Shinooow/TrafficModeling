@@ -10,9 +10,14 @@ model Signalisation
 import "./Rule.gaml"
 
 species Signalisation {
+	int id;
 	file signalisation_icon <- file("../../includes/images/attention_sign.png");
 	float icon_size;
 	list<Rule> rules;
+	
+	action addRule (Rule rule){
+		add rule to: rules;
+	}
 	
 	aspect base {
 		draw circle(2.0) color: #red;

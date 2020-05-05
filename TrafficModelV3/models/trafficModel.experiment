@@ -8,7 +8,7 @@
 experiment trafficModel model:'Main.gaml' type:gui {
 	
 	parameter "Number of cars" var: nb_cars min: 1 max:50 category: "Cars";
-	parameter "Min car speed" var: min_car_speed min: 0.1 #km/#h max: 2.0 #km/#h category: "Cars";
+	parameter "Min car speed" var: min_car_speed min: 0.1 #km/#h max: 1.0 #km/#h category: "Cars";
 	parameter "Max car speed" var: max_car_speed min: 3.0 #km/#h max: 5.0 #km/#h category: "Cars";
 	parameter "Cycle time to change checkpoint location (hours)" var: cycle_time_checkpoint min: 1 max: 5 category: "Checkpoints";
 	
@@ -20,6 +20,7 @@ experiment trafficModel model:'Main.gaml' type:gui {
 			species BluetoothCar aspect: with_icon;
 			species Bike aspect: with_icon;
 			species Home aspect: base;
+			species Bus aspect: with_icon;
 		}
 		
 		/* Display crash_information: graphique type series 

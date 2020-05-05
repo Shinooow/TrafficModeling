@@ -22,7 +22,7 @@ species NonGuidableVehicle parent: Vehicle {
 		}
 		
 		if(must_stay_on_road){
-			do goto target: target on: world.road_graph speed: speed;
+			do goto target: target on: world.roadGraph speed: speed;
 		} else {
 			do goto target: target speed: speed;
 		}

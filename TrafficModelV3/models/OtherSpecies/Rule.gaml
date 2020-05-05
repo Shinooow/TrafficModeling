@@ -8,6 +8,7 @@
 model Rule
 
 species Rule {
+	int id;
 	string contenu <- "Test rule";
 }
 

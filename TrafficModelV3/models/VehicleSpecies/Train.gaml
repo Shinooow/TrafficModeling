@@ -8,8 +8,10 @@
 model Train
 
 import "../GenericVehicleSpecies/NonGuidableVehicle.gaml"
+import "../ConstructionSpecies/Railway.gaml"
 
 /* Insert your model definition here */
 species Train parent: NonGuidableVehicle {
-	
+	int crash_importance <- 5;
+	Railway voie;
 }

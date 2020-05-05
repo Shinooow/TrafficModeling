@@ -11,7 +11,6 @@ species Vehicle skills: [moving] {
 	file fleche_icon <- file("../../includes/images/test4.jpg");
 	float icon_size <- 50.0;
 	
-	float speed <- rnd(min_car_speed, max_car_speed);
 	float max_speed <- speed;
 	point target;
 	bool is_arrived <- true;
@@ -42,6 +41,7 @@ species Vehicle skills: [moving] {
 	float val_origine;
 	bool vertical_eq <- false;
 	bool crashed <- false;
+	int crash_importance;
 
 	/** CALCUL_EQ_ROUTE  
 	 * Calcul de l'équation de la droite de la route calculée depuis deux points
@@ -131,10 +131,20 @@ species Vehicle skills: [moving] {
 		car_icon <- crashed_car_icon;
 		speed <- 0.0;
 		nb_crashed_cars <- nb_crashed_cars +1;
-//		if(is_connected){
-//			do disconnectCar(id);
-//			is_connected <- false;
-//		}
+	}
+	
+	action which_one_crash (Vehicle otherCar) {
+		if(self.crash_importance = otherCar.crash_importance){
+			ask otherCar {
+				do rentre_en_collision;
+			}
+			do rentre_en_collision;
+		} else {
+			Vehicle vehicleToCrash <- (self.crash_importance<otherCar.crash_importance)? self : otherCar;
+			ask vehicleToCrash {
+				do rentre_en_collision;
+			}
+		}
 	}
 	
 	/** VERIFICATION_COLLISION
@@ -151,7 +161,7 @@ species Vehicle skills: [moving] {
 		/* Etape 1: calculer l'equation de la droite représentant la route (via la position actuelle et l'ancienne position) */
 		do calcul_eq_route;
 		/* Etape 2: on regarde si il y a une collision sur chaque voiture */
-		loop other_car over: Vehicle.population {
+		loop other_car over: vehicules {
 			if (self != other_car) {
 			/* Si présents sur la même route */
 			/* Ajout 21/04: reduction de la precision sur l'egalite des valeurs a l origine des equations de droite en raison de 
@@ -163,24 +173,19 @@ species Vehicle skills: [moving] {
 					float tmin <- min(self.last_location.x, self.location.x);
 					float tmax <- max(self.last_location.x, self.location.x);
 					if ((other_car.location.x >= tmin and other_car.location.x <= tmax) or (other_car.last_location.x >= tmin and other_car.last_location.x <= tmax)) {
-						//write "car crash";
-						ask other_car {
-							do rentre_en_collision;
-						}
-						do rentre_en_collision;
+						write "car crash";
+						do which_one_crash(other_car);
 					}
 				} else {
-					/* Ajout 21/04: si il y a une collision dans un virage (ce qui rend le calcul via les equations de droite faux */
-					list<Vehicle> neighbors <- self neighbors_at(20.0);
-					if(length(neighbors) > 0){
-						//write "car crash";
-						loop other_car over: neighbors{
-							ask other_car {
-								do rentre_en_collision;
-							}
+					/* Ajout 21/04: si il y a une collision dans un virage (ce qui rend le calcul via les equations de droite faux) */
+					list neighbors <- self neighbors_at 20.0;	
+					loop ag over: neighbors {
+						if(ag in vehicules){
+							write "car crash";
+							Vehicle ag_vehicle <- Vehicle(ag);
+							do which_one_crash(ag);
 						}
-						do rentre_en_collision;
-					}				
+					}
 				}
 			}
 		}

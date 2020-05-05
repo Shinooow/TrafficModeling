@@ -13,6 +13,6 @@ import "../GenericVehicleSpecies/NonGuidableVehicle.gaml"
 species Bike parent: NonGuidableVehicle {
 	file car_icon <- file("../../includes/images/bicycle.png");
 	float icon_size <- 50.0;
-	
+	int crash_importance <- 1;
 	/** OVERRIDE FROM VEHICLE */
 }

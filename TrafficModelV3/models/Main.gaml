@@ -61,20 +61,22 @@ global {
 	int idRuleCreated <- 0;
 	int idSignalisationCreated <- 0;
 	
+	float seuilBrakeIfCollision <- 100.0;
+	
 	action consBluetoothCar {
 		create BluetoothCar {
-			self.id <- idGuidableVehicleCreated;
-			self.location <- {list_ligne[3*self.id], list_ligne[3*self.id+1], 0.0};
+			self.idGuidable <- idGuidableVehicleCreated;
+			self.location <- {list_ligne[3*self.idGuidable], list_ligne[3*self.idGuidable+1], 0.0};
 			self.angle_rotation <- float(list_ligne[3*self.id+2]);
 			idGuidableVehicleCreated <- idGuidableVehicleCreated+1;
-			do connectCar(self.id);
+			do connectCar(self.idGuidable);
 			add self to: vehicules;
 		}
 	}
 	
 	action consBike (float vitesse){
 		create Bike {
-			self.id <- idNonGuidableVehicleCreated;
+			self.idNonGuidable <- idNonGuidableVehicleCreated;
 			self.location <- any_location_in(one_of(Road.population));
 			self.speed <- vitesse;
 			idNonGuidableVehicleCreated <- idNonGuidableVehicleCreated+1;
@@ -120,7 +122,7 @@ global {
 	
 	action consBus (float vitesse){
 		create Bus {
-			self.id <- idNonGuidableVehicleCreated;
+			self.idNonGuidable <- idNonGuidableVehicleCreated;
 			self.location <- any_location_in(one_of(Road.population));
 			self.speed <- vitesse;
 			idNonGuidableVehicleCreated <- idNonGuidableVehicleCreated+1;
@@ -160,7 +162,7 @@ global {
 	
 	action consTrain (point position, Railway railway){
 		create Train {
-			self.id <- idNonGuidableVehicleCreated;
+			self.idNonGuidable <- idNonGuidableVehicleCreated;
 			self.location <- position;
 			self.voie <- railway;
 			idNonGuidableVehicleCreated <- idNonGuidableVehicleCreated+1;
@@ -182,23 +184,19 @@ global {
 		create Checkpoint from: checkpoints_shapefile;
 		roadGraph <- as_edge_graph(Road.population);
 		
-		create Rule {
-			 self.contenu <- "Je suis la regle 1";
-		}
+//		loop road over: Road.population {
+//			ask road {
+//				add Rule.population[0] to: rules;
+//			}
+//		}
 		
-		loop road over: Road.population {
-			ask road {
-				add Rule.population[0] to: rules;
-			}
-		}
-		
-		loop times: 20 {
-			do consBus(0.5);
-		}
-		
-		loop times: 10 {
-			do consBike(0.2);
-		}
+//		loop times: 4 {
+//			do consBus(0.25);
+//		}
+//		
+//		loop times: 4 {
+//			do consBus(0.1);
+//		}
 		
 	}
 	

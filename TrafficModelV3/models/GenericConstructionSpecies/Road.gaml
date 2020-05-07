@@ -18,7 +18,7 @@ species Road parent: Construction {
 	
 	
 	aspect base {
-		draw shape color: color width: 4;
+		draw shape color: color;
 	}
 }
 

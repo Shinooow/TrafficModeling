@@ -12,6 +12,7 @@ import "Vehicle.gaml"
 /* Insert your model definition here */
 species GuidableVehicle parent: Vehicle skills: [Bluetooth]{
 	bool is_connected <- false;
+	int idGuidable;
 	
 	/** OVERRIDE FROM VEHICLE */
 	reflex mise_a_jour when: target != nil and not crashed{
@@ -22,10 +23,10 @@ species GuidableVehicle parent: Vehicle skills: [Bluetooth]{
 			do acceleration;
 		}
 		
-		point new_location <- {list_ligne[3*id]*mise_a_echelle, list_ligne[3*id+1]*mise_a_echelle, 0.0};
+		point new_location <- {list_ligne[3*idGuidable]*mise_a_echelle, list_ligne[3*idGuidable+1]*mise_a_echelle, 0.0};
 		location <- new_location;
-		angle_rotation <- float(list_ligne[3*id+2]);
-		
+		angle_rotation <- float(list_ligne[3*idGuidable+2]);
+		do calcul_eq_route;
 		do verification_collision;
 	}
 	
@@ -37,7 +38,7 @@ species GuidableVehicle parent: Vehicle skills: [Bluetooth]{
 		speed <- 0.0;
 		nb_crashed_cars <- nb_crashed_cars +1;
 		if(is_connected){
-			do disconnectCar(id);
+			do disconnectCar(idGuidable);
 			is_connected <- false;
 		}
 	}

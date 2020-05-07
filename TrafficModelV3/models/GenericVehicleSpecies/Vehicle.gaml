@@ -15,7 +15,7 @@ species Vehicle skills: [moving] {
 	point target;
 	bool is_arrived <- true;
 	float angle_rotation <- 0.0;
-	point last_location;
+	point last_location <- location;
 	point vecteur_direction;
 	
 	/* Proprietes permettant la connexion bluetooth des vehicules */
@@ -121,6 +121,86 @@ species Vehicle skills: [moving] {
 		}
 	}
 	
+	/** DISTANCE_BETWEEN_TWO_VEHICLES
+	 * Calcule la distance entre deux vehicules 
+	 * retourne cette distance qui est un float
+	 * Prend en parametre le deuxieme vehicule 
+	 */
+	float distance_between_two_vehicles (Vehicle otherVehicle){
+		point positionVa <- location;
+		point positionVb <- otherVehicle.location;
+		float result <- (positionVb.x-positionVa.x)*(positionVb.x-positionVa.x) + (positionVb.y-positionVa.y)*(positionVb.y-positionVa.y);
+		result <- sqrt(result);
+		return result;
+	}
+	
+	
+	action brake_collision_computing_x_axe (Vehicle otherVehicle){
+		bool xDecroissant <- (self.last_location.x>self.location.x);
+		bool xDecroissantOtherCar <- (otherVehicle.last_location.x>otherVehicle.location.x);
+		float distanceBetweenVehicles <- distance_between_two_vehicles(otherVehicle);
+		if(xDecroissant=xDecroissantOtherCar){
+			if(distanceBetweenVehicles<=seuilBrakeIfCollision){
+				/* determiner la voiture derriere l'autre */
+				Vehicle carBehind;
+				if(not xDecroissant){
+					carBehind <- (self.location.x<otherVehicle.location.x)?self:otherVehicle;
+				} else {
+					carBehind <- (self.location.x>otherVehicle.location.x)?self:otherVehicle;
+				}
+				if(carBehind = self and self.speed>otherVehicle.speed){
+					do freinage;
+				}
+			}
+		} else if((not xDecroissant) and xDecroissantOtherCar){
+			/* directions differentes */
+			do freinage;
+			ask otherVehicle{
+				do freinage;
+			}
+		}
+	}
+	
+	action brake_collision_computing_y_axe(Vehicle otherVehicle){
+		bool yDecroissant <- (self.last_location.y>self.location.y);
+		bool yDecroissantOtherCar <- (otherVehicle.last_location.y>otherVehicle.location.y);
+		float distanceBetweenVehicles <- distance_between_two_vehicles(otherVehicle);
+		if(yDecroissant=yDecroissantOtherCar){
+			if(distanceBetweenVehicles<=seuilBrakeIfCollision){
+				/* determiner la voiture derriere l'autre */
+				Vehicle carBehind;
+				if(not yDecroissant){
+					carBehind <- (self.location.y<otherVehicle.location.y)?self:otherVehicle;
+				} else {
+					carBehind <- (self.location.y>otherVehicle.location.y)?self:otherVehicle;
+				}
+				if(carBehind = self and self.speed>otherVehicle.speed){
+					do freinage;
+				}
+			}
+		}  else if((not yDecroissant) and yDecroissantOtherCar){
+			/* directions differentes */
+			do freinage;
+			ask otherVehicle{
+				do freinage;
+			}
+		}						
+	}
+	
+	
+	action brake_if_collision_coming {
+
+		loop otherVehicle over: vehicules{
+			if(self != otherVehicle){
+				if((not vertical_eq) and self.coeff_directeur=otherVehicle.coeff_directeur and self.val_origine=otherVehicle.val_origine){
+					do brake_collision_computing_x_axe(otherVehicle);
+				} else if(vertical_eq and self.location.x=otherVehicle.location.x){
+					do brake_collision_computing_y_axe(otherVehicle);
+				}
+			}
+		}
+	}
+	
 	/** RENTRE_EN_COLLISION
 	 * Change les parametres mis en cause lors d'une collision de deux
 	 * voiture par exemple le booleen crashed placé à vrai
@@ -159,7 +239,7 @@ species Vehicle skills: [moving] {
 	action verification_collision {
 		
 		/* Etape 1: calculer l'equation de la droite représentant la route (via la position actuelle et l'ancienne position) */
-		do calcul_eq_route;
+		//do calcul_eq_route;
 		/* Etape 2: on regarde si il y a une collision sur chaque voiture */
 		loop other_car over: vehicules {
 			if (self != other_car) {
@@ -227,7 +307,9 @@ species Vehicle skills: [moving] {
 	reflex get_rules when: not crashed {
 		list<Road> on_road <- Road.population at_distance (0.5);
 		loop ag over: on_road {
-			write ag.rules[0].contenu;
+			if(length(ag.rules) != 0){
+				write ag.rules[0].contenu;
+			}
 		}
 	}
 

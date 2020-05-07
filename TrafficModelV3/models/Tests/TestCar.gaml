@@ -18,9 +18,11 @@ global {
 		Vehicle c1 <- Vehicle.population[0];
 		Vehicle c2 <- Vehicle.population[1];
 		ask c1 {
+			remove self from: vehicules;
 			do die;
 		}
 		ask c2 {
+			remove self from: vehicules;
 			do die;
 		}
 	}
@@ -30,11 +32,13 @@ global {
 		create Vehicle {
 			self.id <- 0;
 			self.crashed <- false;
+			add self to: vehicules;
 		}
 		
 		create Vehicle {
 			self.id <- 1;
 			self.crashed <- false;
+			add self to: vehicules;
 		}
 	}
 	
@@ -52,6 +56,12 @@ global {
 		c1.location <- {100.0, 100.0, 0.0};
 		c2.last_location <- {110.0, 110.0, 0.0};
 		c2.location <- {80.0, 80.0, 0.0};
+		
+		/* calcul des equations de droite des routes */
+		ask [c1, c2]{
+			do calcul_eq_route;
+		}
+		
 		ask c1 {
 			do verification_collision;
 		}
@@ -78,6 +88,12 @@ global {
 		c1.location <- {100.0, 100.0, 0.0};
 		c2.last_location <- {248.0, 200.0, 0.0};
 		c2.location <- {100.0, 100.0, 0.0};
+		
+		/* calcul des equations de droite des routes */
+		ask [c1, c2]{
+			do calcul_eq_route;
+		}
+		
 		ask c1 {
 			do verification_collision;
 		}
@@ -104,6 +120,12 @@ global {
 		c1.location <- {112.0, 92.0, 0.0};
 		c2.last_location <- {120.0, 100.0, 0.0};
 		c2.location <- {108.0, 108.0, 0.0};
+		
+		/* calcul des equations de droite des routes */
+		ask [c1, c2]{
+			do calcul_eq_route;
+		}
+		
 		ask c1 {
 			do verification_collision;
 		}
@@ -129,6 +151,12 @@ global {
 		c1.location <- {175.0, 175.0, 0.0};
 		c2.last_location <- {409.5, 840.0, 0.0};
 		c2.location <- {434.0, 840.0, 0.0};
+		
+		/* calcul des equations de droite des routes */
+		ask [c1, c2]{
+			do calcul_eq_route;
+		}
+		
 		ask c1 {
 			do verification_collision;
 		}

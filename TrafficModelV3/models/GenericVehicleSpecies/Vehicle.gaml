@@ -32,7 +32,7 @@ species Vehicle skills: [moving] {
 	 */
 	bool can_speed_up <- false;
 	bool must_brake <- false;
-	float coeff_deceleration <- 0.20;
+	float coeff_deceleration <- 0.30;
 	float coeff_acceleration <- 0.75;
 
 	/* COLLISIONS DES VOITURES */
@@ -76,9 +76,9 @@ species Vehicle skills: [moving] {
 		float nouvelle_vitesse <- speed - speed * coeff_deceleration;
 		if (nouvelle_vitesse < seuil_vitesse_min) {
 			speed <- 0.0;
-			must_brake <- false;
 		} else {
 			speed <- nouvelle_vitesse;
+			coeff_deceleration <- coeff_deceleration+0.10;
 		}
 	}
 
@@ -127,6 +127,7 @@ species Vehicle skills: [moving] {
 	 * Prend en parametre le deuxieme vehicule 
 	 */
 	float distance_between_two_vehicles (Vehicle otherVehicle){
+		
 		point positionVa <- location;
 		point positionVb <- otherVehicle.location;
 		float result <- (positionVb.x-positionVa.x)*(positionVb.x-positionVa.x) + (positionVb.y-positionVa.y)*(positionVb.y-positionVa.y);
@@ -134,8 +135,14 @@ species Vehicle skills: [moving] {
 		return result;
 	}
 	
-	
+	/** BRAKE_COLLISION_COMPUTING_X_AXIS
+	 * Calcule si le vehicule doit freiner pour eviter une collision
+	 * en ligne droite
+	 * calculs sur l'axe x depuis l'equation de droite 
+	 * param in: second vehicule pour les calculs et comparaisons
+	 */
 	action brake_collision_computing_x_axe (Vehicle otherVehicle){
+		
 		bool xDecroissant <- (self.last_location.x>self.location.x);
 		bool xDecroissantOtherCar <- (otherVehicle.last_location.x>otherVehicle.location.x);
 		float distanceBetweenVehicles <- distance_between_two_vehicles(otherVehicle);
@@ -152,7 +159,7 @@ species Vehicle skills: [moving] {
 					do freinage;
 				}
 			}
-		} else if((not xDecroissant) and xDecroissantOtherCar){
+		} else if((not xDecroissant) and distanceBetweenVehicles<=seuilBrakeIfCollision){
 			/* directions differentes */
 			do freinage;
 			ask otherVehicle{
@@ -161,7 +168,14 @@ species Vehicle skills: [moving] {
 		}
 	}
 	
+	/** BRAKE_COLLISION_COMPUTING_Y_AXIS
+	 * Calcule si le vehicule doit freiner pour eviter une collision
+	 * en ligne droite
+	 * calculs sur l'axe y en raison d'une trajectoire totalement verticale
+	 * param in: second vehicule pour les calculs et comparaisons
+	 */
 	action brake_collision_computing_y_axe(Vehicle otherVehicle){
+		
 		bool yDecroissant <- (self.last_location.y>self.location.y);
 		bool yDecroissantOtherCar <- (otherVehicle.last_location.y>otherVehicle.location.y);
 		float distanceBetweenVehicles <- distance_between_two_vehicles(otherVehicle);
@@ -178,7 +192,7 @@ species Vehicle skills: [moving] {
 					do freinage;
 				}
 			}
-		}  else if((not yDecroissant) and yDecroissantOtherCar){
+		}  else if((not yDecroissant) and yDecroissantOtherCar and distanceBetweenVehicles<=seuilBrakeIfCollision){
 			/* directions differentes */
 			do freinage;
 			ask otherVehicle{
@@ -187,7 +201,11 @@ species Vehicle skills: [moving] {
 		}						
 	}
 	
-	
+	/** BRAKE_IF_COLLISION_COMING
+	 * action qui verifie si une collision est a prevoir entre
+	 * self et tous les autres vehicules presents de la simulation
+	 * si oui, le vehicule freinera
+	 */
 	action brake_if_collision_coming {
 
 		loop otherVehicle over: vehicules{
@@ -213,6 +231,13 @@ species Vehicle skills: [moving] {
 		nb_crashed_cars <- nb_crashed_cars +1;
 	}
 	
+	/** WHICH_ONE_CRASHES
+	 * Dans une collision, cette action compare les deux coefficients 
+	 * crash_importance des vehicules, si un est inferieur a l'autre,
+	 * alors le vehicule correspondant est detruit
+	 * Si il y a egalite, les deux vehicules sont detruits
+	 * Param in: second vehicule de la collision
+	 */
 	action which_one_crash (Vehicle otherCar) {
 		if(self.crash_importance = otherCar.crash_importance){
 			ask otherCar {
@@ -316,7 +341,7 @@ species Vehicle skills: [moving] {
 	aspect with_icon {
 		draw car_icon size: icon_size rotate: angle_rotation;
 		draw fleche_icon at: {location.x-25, location.y-25, 0} rotate: angle_rotation size: 30;
-		draw string(speed with_precision 3) size: 20 color: #black width: 5;
+		draw string((speed*100.0) with_precision 3) size: 20 color: #black width: 5;
 	}
 
 }

@@ -20,26 +20,12 @@ import "./VehicleSpecies/Train.gaml"
 
 global {
 	
-	string getRoadPathFile {
-		switch expChoice {
-			match 0 { return "../includes/shapefiles/circuitv2.shp";}
-			match 1 { return "../includes/shapefiles/TestBrakeIfCollision.shp";}
-			match 2 { return "../includes/shapefiles/TestInsertion.shp";}
-			match 3 { return "../includes/shapefiles/TestRondsPoints.shp";}
-			default { return "erreurExpChoice"; }
-		} 
-	}
-	
-	string getCheckpointPathFile {
-		switch expChoice {
-			match 0 { return "../includes/shapefiles/checkpointsv2.shp";}
-			match 1 { return "../includes/shapefiles/TestBrakeIfCollisionCheckpoints.shp"; }
-			match 2 { return "../includes/shapefiles/TestInsertionCheckpoints.shp"; }
-			match 3 { return "../includes/shapefiles/TestRondsPointsCheckpoints.shp"; }
-			default { return "erreurExpChoice"; }
-		}
-	}
-	
+	/* choix de l'experience
+	 * - 0: basicExperience
+	 * - 1: experience de test de freinage en cas de collision proche
+	 * - 2: experience de test d'insertion
+	 * - 3: experience de test de rond point
+	 */
 	int expChoice <- 0;
 	string pathRoad <- getRoadPathFile();
 	string zPathCheck <- getCheckpointPathFile();
@@ -47,9 +33,9 @@ global {
 	/* Graphic parameters - shapesfiles */
 	file roads_shapefile <- file(pathRoad);
 	file checkpoints_shapefile <- file(zPathCheck);
+	file railway_shapefile <- file("../includes/shapefiles/railway.shp");
 	geometry shape <- envelope(roads_shapefile);
 	graph roadGraph;
-	
 	
 	/* World paramaters */
 	date starting_date <- date("2020-04-10-00-00-00");
@@ -60,11 +46,12 @@ global {
 	matrix csv_matrice <- matrix(csv_camera);
 	list<int> list_ligne <- list<int>(row_at(csv_matrice, 0)); 
 	
-	int nb_cars <- 1;
+	/* duree d'un cycle avant les changements de position des checkpoint (en heures) */
 	int cycle_time_checkpoint <- 2;
-	float car_speed <- 2 #km / #h;
-	float min_car_speed <- 0.5 #km/#h;
-	float max_car_speed <- 2.0 #km/#m;
+
+	/* Lors du freinage, si la vitesse du vehicule se retrouve en dessous
+	 * du seuil, alors le vehicule s'arrete
+	 */
 	float seuil_vitesse_min <- 0.02;
 	
 	/* Permet le calcul du vecteur direction et de l'angle de l'orientation de l'icone voiture */
@@ -73,12 +60,20 @@ global {
 	/* Permet l'affichage du graphique sur le nombre de voitures accidentees */
 	int nb_crashed_cars <- 0;
 	
+	/* Nombre d'etape realisees a l'instant t dans la simulation */
 	int nb_step <- 0;
+	
+	/* Coefficient permettant de mettre a l'echelles des donnees recues de l'exterieur */
 	float mise_a_echelle <- 7.0;
 	
+	/* collection de tous les vehicules (aussi bien guidables que non guidables) */
 	list<Vehicle> vehicules;
+	/* collection de toutes les constructions */
 	list<Construction> constructions;
 	
+	/* Identifiants a la creation pour chaque type d'espece
+	 * en cas de besoin, rajouter ici d'autres id
+	 */
 	int idGuidableVehicleCreated <- 0;
 	int idNonGuidableVehicleCreated <- 0;
 	int idConstructionCreated <- 0;
@@ -88,6 +83,39 @@ global {
 	
 	float seuilBrakeIfCollision <- 300.0;
 	
+	/* --------------------------------------------------------------------------------------------------- */
+	/* ------------------------------------------ DEBUT ACTIONS ------------------------------------------ */
+	/* --------------------------------------------------------------------------------------------------- */
+	
+	/* Retourne le chemin du fichier shapefile des routes en fonction de l'experience choisie
+	 * En cas d'ajout d'experience: ajouter ici un nouveau chemin 
+	 */
+	string getRoadPathFile {
+		switch expChoice {
+			match 0 { return "../includes/shapefiles/circuitv2.shp"; }
+			match 1 { return "../includes/shapefiles/TestBrakeIfCollision.shp"; }
+			match 2 { return "../includes/shapefiles/TestInsertion.shp"; }
+			match 3 { return "../includes/shapefiles/TestRondsPoints.shp"; }
+			default { return "erreurExpChoice"; }
+		} 
+	}
+	
+	/* Retourne le chemin du fichier shapefile des checkpoints en fonction de l'experience choisie
+	 * En cas d'ajout d'experience: ajouter ici un nouveau chemin
+	 */
+	string getCheckpointPathFile {
+		switch expChoice {
+			match 0 { return "../includes/shapefiles/checkpointsv2.shp"; }
+			match 1 { return "../includes/shapefiles/TestBrakeIfCollisionCheckpoints.shp"; }
+			match 2 { return "../includes/shapefiles/TestInsertionCheckpoints.shp"; }
+			match 3 { return "../includes/shapefiles/TestRondsPointsCheckpoints.shp"; }
+			default { return "erreurExpChoice"; }
+		}
+	}
+	
+	/* --------------------------------------------------------------------------------------------------- */
+	/* --------------------------------------- DEBUT CONSTRUCTEURS --------------------------------------- */
+	/* --------------------------------------------------------------------------------------------------- */
 	
 	action consBluetoothCar {
 		create BluetoothCar {
@@ -217,9 +245,16 @@ global {
 		}
 	}
 	
+	/* --------------------------------------------------------------------------------------------------- */
+	/* ---------------------------------------- FIN CONSTRUCTEURS ---------------------------------------- */
+	/* --------------------------------------------------------------------------------------------------- */
 	
 	
+	/* Creation des agents pour l'experience "basique" regroupant
+	 * plusieurs proprietes telles que les insertions, croisements...
+	 */
 	action initBasicExp{
+		create Railway from: railway_shapefile;
 		loop times: 10 {
 			do consBus(0.2);
 		}
@@ -231,6 +266,12 @@ global {
 		}
 	}
 	
+	/* Creation des agents pour l'experience de test du freinage
+	 * si une collision approche entre deux vehicules
+	 * Agents: 3 groupes de deux vehicules, pour chaque groupe,
+	 * si aucune action n'est effectuée, les vehicules rentrent en
+	 * collision
+	 */
 	action initBrakeIfCollisionExp {
 		do consBusWithStartAndTarget(0.1, Checkpoint.population[0].location, Checkpoint.population[1]);
 		do consBusWithStartAndTarget(0.2, Checkpoint.population[1].location, Checkpoint.population[0]);
@@ -240,18 +281,32 @@ global {
 		do consBusWithStartAndTarget(0.1, Checkpoint.population[6].location, Checkpoint.population[5]);
 	}
 	
+	/* Creation des agents pour l'experience de test des insertions
+	 * Agents: 2 agents qui s'inserent chacun dans une voie, et un
+	 * autre qui lui suit la route sur laquelle il se trouve
+	 */
 	action initInsertionExp {
 		do consBusWithStartAndTarget(0.1, Checkpoint.population[3].location, Checkpoint.population[0]);
 		do consBusWithStartAndTarget(0.1, Checkpoint.population[4].location, Checkpoint.population[0]);
 		do consBusWithStartAndTarget(0.1, Checkpoint.population[2].location, Checkpoint.population[5]);
 	}
 	
+	/* Creation des agents pour l'experience de test des ronds points
+	 * Agents: 3 agents qui vont devoir se servir du rond point pour 
+	 * atteindre leur checkpoint cible
+	 */
 	action initRondPointExp {
 		do consBusWithStartAndTarget(0.2, Checkpoint.population[0].location, Checkpoint.population[3]);
 		do consBusWithStartAndTarget(0.2, Checkpoint.population[1].location, Checkpoint.population[4]);
 		do consBusWithStartAndTarget(0.2, Checkpoint.population[2].location, Checkpoint.population[4]);
 	}
 	
+	/* Algorithme d'initialisation:
+	 * - creer les routes et checkpoints en fonction de l'experience
+	 *   choisie
+	 * - initialiser le graphe des routes
+	 * - creer les agents correspondant a l'experience choisie
+	 */
 	init {
 		create Road from: roads_shapefile;
 		create Checkpoint from: checkpoints_shapefile;
@@ -265,10 +320,14 @@ global {
 		}
 	}
 	
+	/*------------------------------------------------------------------------------------------------ */
+	/* ---------------------------------------  DEBUT REFLEXES --------------------------------------- */
+	/* ----------------------------------------------------------------------------------------------- */
+	
 	/** REFLEX ONE_STEP
 	 * Incremente la propriete nb_step permettant de savoir à un moment t a quelle etape
 	 * nous nous trouvons
-	 * Met aussi a jour les donnees reçues par la camera
+	 * Met aussi a jour les donnees recues par la camera
 	 */
 	reflex one_step {
 		
@@ -298,5 +357,8 @@ global {
 		do pause;
 	}
 	
+	/* ---------------------------------------------------------------------------------------------- */
+	/* ---------------------------------------- FIN REFLEXES ---------------------------------------- */
+	/* ---------------------------------------------------------------------------------------------- */
 		
 }

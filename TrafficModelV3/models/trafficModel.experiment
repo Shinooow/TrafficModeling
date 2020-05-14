@@ -19,6 +19,7 @@ experiment trafficModel model:'Main.gaml' type:gui {
 			species Bike aspect: with_icon;
 			species Home aspect: base;
 			species Bus aspect: with_icon;
+			species Railway aspect: with_image;
 		}
 		
 		/* Display crash_information: graphique type series 

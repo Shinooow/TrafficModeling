@@ -15,7 +15,7 @@ species Road parent: Construction {
 	int nombreVoies;
 	float vitesseMax;
 	list<Rule> rules;
-	
+		
 	
 	aspect base {
 		draw shape color: color;

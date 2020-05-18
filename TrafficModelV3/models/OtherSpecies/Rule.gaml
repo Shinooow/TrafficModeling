@@ -7,8 +7,12 @@
 
 model Rule
 
+import "./Checkpoint.gaml"
+
 species Rule {
 	int id;
 	string contenu <- "Test rule";
+	int type;
+	Checkpoint oneWayTarget;
 }
 

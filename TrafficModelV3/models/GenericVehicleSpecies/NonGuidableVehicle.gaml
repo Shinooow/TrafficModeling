@@ -21,11 +21,11 @@ species NonGuidableVehicle parent: Vehicle {
 		} else if(can_speed_up){
 			do acceleration;
 		}
-		
+		point destinationCible <- (secondaryTarget=nil)? target:secondaryTarget;
 		if(must_stay_on_road){
-			do goto target: target on: world.roadGraph speed: speed;
+			do goto target: destinationCible on: world.roadGraph speed: speed;
 		} else {
-			do goto target: target speed: speed;
+			do goto target: destinationCible speed: speed;
 		}
 		
 		do calcul_angle_rotation;

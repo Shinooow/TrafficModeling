@@ -24,7 +24,7 @@ global {
 	setup {
 		/* Creation de l'agent voiture avant chaque test */
 		create GuidableVehicle {
-			self.id <- 0;
+			self.idGuidable <- 0;
 			self.is_connected <- false;
 		}
 	}

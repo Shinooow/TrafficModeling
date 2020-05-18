@@ -23,9 +23,9 @@ species GuidableVehicle parent: Vehicle skills: [Bluetooth]{
 			do acceleration;
 		}
 		
-		point new_location <- {list_ligne[3*idGuidable]*mise_a_echelle, list_ligne[3*idGuidable+1]*mise_a_echelle, 0.0};
+		point new_location <- {list_ligne[2*idGuidable]*mise_a_echelle, list_ligne[2*idGuidable+1]*mise_a_echelle, 0.0};
 		location <- new_location;
-		angle_rotation <- float(list_ligne[3*idGuidable+2]);
+		//angle_rotation <- float(list_ligne[3*idGuidable+2]);
 		do calcul_eq_route;
 		do verification_collision;
 	}

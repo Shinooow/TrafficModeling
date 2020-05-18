@@ -8,7 +8,7 @@
 experiment trafficModel model:'Main.gaml' type:gui {
 	
 	parameter "Cycle time to change checkpoint location (hours)" var: cycle_time_checkpoint min: 1 max: 5 category: "Checkpoints";
-	parameter "Number of the experiment" var: expChoice min: 0 max: 3 category: "Experiment";
+	parameter "Number of the experiment" var: expChoice min: 0 max: 4 category: "Experiment";
 	
 	output {
 		/* Display MAP: affichage des especes */

@@ -25,6 +25,7 @@ global {
 	 * - 1: experience de test de freinage en cas de collision proche
 	 * - 2: experience de test d'insertion
 	 * - 3: experience de test de rond point
+	 * - 4: experience de test sur le campus Paul Sabatier
 	 */
 	int expChoice <- 0;
 	string pathRoad <- getRoadPathFile();
@@ -42,9 +43,11 @@ global {
 	float step <- 3 #mn;
 	
 	/* LECTURE DES INFORMATIONS DE LA CAMERA */
-	csv_file csv_camera <- csv_file("../includes/data_camera.csv");
+	csv_file csv_camera <- csv_file("../includes/data_cameraV2.csv");
 	matrix csv_matrice <- matrix(csv_camera);
-	list<int> list_ligne <- list<int>(row_at(csv_matrice, 0)); 
+	/* Version si modification d'une seule ligne par etape */
+	list<float> list_ligne <- list<float>(row_at(csv_matrice, 0)); 
+	/* Version depuis fichiers de logs */
 	
 	/* duree d'un cycle avant les changements de position des checkpoint (en heures) */
 	int cycle_time_checkpoint <- 2;
@@ -95,7 +98,8 @@ global {
 			match 0 { return "../includes/shapefiles/circuitv2.shp"; }
 			match 1 { return "../includes/shapefiles/TestBrakeIfCollision.shp"; }
 			match 2 { return "../includes/shapefiles/TestInsertion.shp"; }
-			match 3 { return "../includes/shapefiles/TestRondsPoints.shp"; }
+			match 3 { return "../includes/shapefiles/RondPoint2.shp"; }
+			match 4 { return "../includes/shapefiles/roads.shp"; }
 			default { return "erreurExpChoice"; }
 		} 
 	}
@@ -108,7 +112,8 @@ global {
 			match 0 { return "../includes/shapefiles/checkpointsv2.shp"; }
 			match 1 { return "../includes/shapefiles/TestBrakeIfCollisionCheckpoints.shp"; }
 			match 2 { return "../includes/shapefiles/TestInsertionCheckpoints.shp"; }
-			match 3 { return "../includes/shapefiles/TestRondsPointsCheckpoints.shp"; }
+			match 3 { return "../includes/shapefiles/RondPoint2Checkpoints.shp"; }
+			match 4 { return "../includes/shapefiles/UPSCheckpoints.shp"; }
 			default { return "erreurExpChoice"; }
 		}
 	}
@@ -120,8 +125,8 @@ global {
 	action consBluetoothCar {
 		create BluetoothCar {
 			self.idGuidable <- idGuidableVehicleCreated;
-			self.location <- {list_ligne[3*self.idGuidable], list_ligne[3*self.idGuidable+1], 0.0};
-			self.angle_rotation <- float(list_ligne[3*self.id+2]);
+			self.location <- {list_ligne[2*self.idGuidable], list_ligne[2*self.idGuidable+1], 0.0};
+			//self.angle_rotation <- float(list_ligne[3*self.idGuidable+2]);
 			idGuidableVehicleCreated <- idGuidableVehicleCreated+1;
 			do connectCar(self.idGuidable);
 			self.is_connected <- true;
@@ -145,11 +150,20 @@ global {
 		roadGraph <- as_edge_graph(Road.population);
 	}
 	
-	action consRule (string content){
+	action consRuleMessage (string content){
 		create Rule {
 			self.id <- idRuleCreated;
+			self.type <- 0;
 			self.contenu <- content;
 			idRuleCreated <- idRuleCreated+1; 
+		}
+	}
+	
+	action consRuleOneway (Checkpoint directionTarget){
+		create Rule {
+			self.id <- idRuleCreated;
+			self.type <- 1;
+			self.oneWayTarget <- directionTarget;
 		}
 	}
 	
@@ -164,7 +178,7 @@ global {
 		}
 	}
 	
-	action consAdministration (point position, float dimensionLongueur, float dimensionLargeur){
+	action consAdmin (point position, float dimensionLongueur, float dimensionLargeur){
 		create Administration {
 			self.location <- position;
 			self.dimension_longueur <- dimensionLongueur;
@@ -209,10 +223,10 @@ global {
 		}
 	}
 	
-	action consAgent (point position, Administration administration, Home home){
+	action consAgent (point position, Administration admin, Home home){
 		create Agent {
 			self.location <- position;
-			self.administration <- administration;
+			self.administration <- admin;
 			self.home <- home;
 			self.id <- idAgentCreated;
 			idAgentCreated <- idAgentCreated+1;
@@ -296,9 +310,54 @@ global {
 	 * atteindre leur checkpoint cible
 	 */
 	action initRondPointExp {
-		do consBusWithStartAndTarget(0.2, Checkpoint.population[0].location, Checkpoint.population[3]);
-		do consBusWithStartAndTarget(0.2, Checkpoint.population[1].location, Checkpoint.population[4]);
-		do consBusWithStartAndTarget(0.2, Checkpoint.population[2].location, Checkpoint.population[4]);
+		do consBusWithStartAndTarget(0.1, Checkpoint.population[4].location, Checkpoint.population[0]);
+		do consBusWithStartAndTarget(0.1, Checkpoint.population[5].location, Checkpoint.population[6]);
+		/* creation des regles */
+		do consRuleOneway(Checkpoint.population[0]);
+		do consRuleOneway(Checkpoint.population[1]);
+		do consRuleOneway(Checkpoint.population[2]);
+		do consRuleOneway(Checkpoint.population[3]);
+		do consRuleOneway(Checkpoint.population[7]);
+		do consRuleOneway(Checkpoint.population[8]);
+		do consRuleOneway(Checkpoint.population[9]);
+		/* attribution des regles aux routes */
+		ask Road.population[16]{
+			//Ajout de la regle 0 a la route 16
+			do addRule(Rule.population[0]);
+		}
+		ask Road.population[4]{
+			//Ajout de la regle 4 a la route 4
+			do addRule(Rule.population[4]);
+		}
+		ask Road.population[7]{
+			//Ajout de la regle 1 a la route 7
+			do addRule(Rule.population[1]);
+		}
+		ask Road.population[10]{
+			//Ajout de la regle 5 a la route 10
+			do addRule(Rule.population[5]);
+		}
+		ask Road.population[13]{
+			//Ajout de la regle 2 a la route 13
+			do addRule(Rule.population[2]);
+		}
+		ask Road.population[12]{
+			//Ajout de la regle 6 a la route 12
+			do addRule(Rule.population[6]);
+		}
+		ask Road.population[17]{
+			//Ajout de la regle 3 a la route 17
+			do addRule(Rule.population[3]);
+		}
+	}
+	
+	action initUPSExp {
+		loop times: 20 {
+			do consBus(0.2);
+		}
+		loop times: 20 {
+			do consBike(0.1);
+		}
 	}
 	
 	/* Algorithme d'initialisation:
@@ -316,6 +375,7 @@ global {
 			match 1 { do initBrakeIfCollisionExp; break;}
 			match 2 { do initInsertionExp; break; }
 			match 3 { do initRondPointExp; break; }
+			match 4 { do initUPSExp; break; }
 			default { write "erreur expChoice"; break; }
 		}
 	}
@@ -332,17 +392,16 @@ global {
 	reflex one_step {
 		
 		nb_step <- nb_step +1;
-		csv_camera <- csv_file("../includes/data_camera.csv");
-		csv_matrice <- matrix(csv_camera);
-		list_ligne <- list<int>(row_at(csv_matrice, 0)); 
-		write list_ligne;
+//		csv_camera <- csv_file("../includes/data_camera.csv");
+//		csv_matrice <- matrix(csv_camera);
+		list_ligne <- list<float>(row_at(csv_matrice, nb_step)); 
 	}
 	
 	/** REFLEX STOP_SIMULATION
 	 * Condition: quand plus de donnees sont presentes sur la position des voitures depuis la camera
 	 * Deconnecte toute les voitures connectees en Bluetooth puis met en pause l'experimentation
 	 */
-	reflex stop_simulation when: nb_step = 100 {
+	reflex stop_simulation when: nb_step = 49 {
 		
 		loop car over: vehicules{
 			if(car is GuidableVehicle){

@@ -18,8 +18,10 @@ species Vehicle skills: [moving] {
 	point last_location <- location;
 	point vecteur_direction;
 	
-	/* Proprietes permettant la connexion bluetooth des vehicules */
-	int id;
+	int nb_passagers;
+	
+	/* Propriete utile pour la regle oneWay (voir Rule) */
+	point secondaryTarget <- nil;
 
 	/* Si must_stay_on_road est placé à faux la voiture peut
 	 * se déplacer en dehors de la route
@@ -41,7 +43,17 @@ species Vehicle skills: [moving] {
 	float val_origine;
 	bool vertical_eq <- false;
 	bool crashed <- false;
+	/* Coefficient d'importance lors d'une collision:
+	 * si les coefficients entre deux vehicules sont egaux, 
+	 * les deux rentrent en collision, sinon seulement le vehicule avec
+	 * le coefficient le plus faible
+	 */
 	int crash_importance;
+	
+	/* --------------------------------------------------------------------------------------------------- */
+	/* ------------------------------------------ DEBUT ACTIONS ------------------------------------------ */
+	/* --------------------------------------------------------------------------------------------------- */
+	
 
 	/** CALCUL_EQ_ROUTE  
 	 * Calcul de l'équation de la droite de la route calculée depuis deux points
@@ -238,7 +250,7 @@ species Vehicle skills: [moving] {
 	 * Si il y a egalite, les deux vehicules sont detruits
 	 * Param in: second vehicule de la collision
 	 */
-	action which_one_crash (Vehicle otherCar) {
+	action which_ones_crash (Vehicle otherCar) {
 		if(self.crash_importance = otherCar.crash_importance){
 			ask otherCar {
 				do rentre_en_collision;
@@ -279,7 +291,7 @@ species Vehicle skills: [moving] {
 					float tmax <- max(self.last_location.x, self.location.x);
 					if ((other_car.location.x >= tmin and other_car.location.x <= tmax) or (other_car.last_location.x >= tmin and other_car.last_location.x <= tmax)) {
 						write "car crash";
-						do which_one_crash(other_car);
+						do which_ones_crash(other_car);
 					}
 				} else {
 					/* Ajout 21/04: si il y a une collision dans un virage (ce qui rend le calcul via les equations de droite faux) */
@@ -288,7 +300,7 @@ species Vehicle skills: [moving] {
 						if(ag in vehicules){
 							write "car crash";
 							Vehicle ag_vehicle <- Vehicle(ag);
-							do which_one_crash(ag);
+							do which_ones_crash(ag);
 						}
 					}
 				}
@@ -296,6 +308,61 @@ species Vehicle skills: [moving] {
 		}
 	}
 
+	/** ACTION PERCEPTION
+	 * Retourne la liste des regles de la route sur laquelle
+	 * le vehicule se trouve
+	 * Utilise at_distance pour obtenir la route
+	 */
+	list<Rule> perception {
+		
+		list<Rule> detectedRules;
+		list<Road> on_road <- Road.population at_distance (0.5);
+		loop road over: on_road {
+			if(length(road.rules)>0){
+				loop rule over: road.rules{
+					add rule to: detectedRules;
+				}
+			}
+		}
+		return detectedRules;
+	}
+	
+	/** ACTION DECISION
+	 * Param in: liste des regles a appliquer
+	 * Applique toutes les regles presentes dans la liste 
+	 * passee en parametre
+	 * Si des nouveaux types de regles sont ajoutees, il faut 
+	 * ajouter un match dans le switch dans cette action
+	 */
+	action decision (list<Rule> detectedRules){
+		
+		loop rule over: detectedRules{
+			switch rule.type {
+				match 1 { secondaryTarget <- rule.oneWayTarget.location; break;}
+			}
+		}
+	}
+	
+	/* --------------------------------------------------------------------------------------------------- */
+	/* ------------------------------------------- FIN ACTIONS ------------------------------------------- */
+	/* --------------------------------------------------------------------------------------------------- */
+	
+	/*---------------------------------------------------------------------------------------------------- */
+	/* -----------------------------------------  DEBUT REFLEXES ----------------------------------------- */
+	/* ----------------------------------------------------------------------------------------------------*/
+	
+		
+	/** REFLEX PERCEPTIONDECISION
+	 * A chaque etape de la simulation, chaque vehicule recupere
+	 * les regles de la route sur laquelle il se trouve et les
+	 * applique
+	 */
+	reflex perceptionDecision {
+		
+		list<Rule> detectedRules <- perception();
+		do decision(detectedRules);
+	}
+	
 	/** REFLEX SETUP_TARGET
 	 * Après que la voiture soit arrivée à une destination
 	 * une nouvelle destination est choisie aléatoirement
@@ -329,14 +396,10 @@ species Vehicle skills: [moving] {
 		// REDEFINI PAR LES ESPECES FILLES
 	}
 	
-	reflex get_rules when: not crashed {
-		list<Road> on_road <- Road.population at_distance (0.5);
-		loop ag over: on_road {
-			if(length(ag.rules) != 0){
-				write ag.rules[0].contenu;
-			}
-		}
-	}
+	/*---------------------------------------------------------------------------------------------------- */
+	/* ------------------------------------------- FIN REFLEXES ------------------------------------------ */
+	/* ----------------------------------------------------------------------------------------------------*/
+	
 
 	aspect with_icon {
 		draw car_icon size: icon_size rotate: angle_rotation;

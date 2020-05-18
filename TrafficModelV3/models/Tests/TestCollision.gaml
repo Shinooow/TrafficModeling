@@ -30,13 +30,11 @@ global {
 	setup {
 		/** Creation des agents pour un test */
 		create Vehicle {
-			self.id <- 0;
 			self.crashed <- false;
 			add self to: vehicules;
 		}
 		
 		create Vehicle {
-			self.id <- 1;
 			self.crashed <- false;
 			add self to: vehicules;
 		}
